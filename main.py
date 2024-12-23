@@ -40,7 +40,6 @@ from typing import Any, AnyStr, Deque, Dict, List, Optional, Set, Text, Tuple
 
 import logbook
 import json
-import OpenSSL.crypto as crypto
 from future.utils import bytes_to_native_str as n
 from logbook import Logger, StreamHandler
 
@@ -118,6 +117,16 @@ logger = Logger("matrix-cli")
 
 
 def print_certificate_info(buff, sock, cert):
+    try:
+        import OpenSSL.crypto as crypto
+    except:
+        message = (
+            "{prefix}matrix: printing certificate info is not supported after reload, "
+            + "see https://github.com/poljar/weechat-matrix/issues/357"
+        ).format(prefix=W.prefix("network"))
+        W.prnt(buff, message)
+        return
+
     cert_pem = ssl.DER_cert_to_PEM_cert(sock.getpeercert(True))
 
     x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_pem)
